@@ -1,0 +1,57 @@
+.slot-machine {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    background: #2c3e50;
+    padding: 30px;
+    border-radius: 10px;
+}
+
+.reel {
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+    background: #fff;
+    border: 3px solid #e74c3c;
+    border-radius: 8px;
+}
+
+.reel-content {
+    transition: transform 0.3s ease-out;
+    line-height: 100px;
+    font-size: 40px;
+    text-align: center;
+}
+
+.reel-item {
+    height: 100px;
+}
+
+#startBtn {
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    padding: 15px 30px;
+    font-size: 20px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+#result {
+    margin-top: 20px;
+    font-size: 24px;
+    font-weight: bold;
+}

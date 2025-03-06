@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>今天吃啥</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="slot-machine" id="slotMachine">
+        <div class="reel"><div class="reel-content"></div></div>
+        <div class="reel"><div class="reel-content"></div></div>
+        <div class="reel"><div class="reel-content"></div></div>
+    </div>
+    <button id="startBtn">今晚吃啥</button>
+    <div id="result"></div>
+
+    <script>
+        const reels = document.querySelectorAll('.reel-content');
+        const startBtn = document.getElementById('startBtn');
+        
+        // 配置三个独立滚轮的内容数组
+        const reelContents1 = ['鸡', '鸭', '鱼', '猪', '牛', '羊'];
+        const reelContents2 = ['米饭', '粥', '馒头', '包子', '炒粉']; 
+        const reelContents3 = ['例汤', '排骨汤', '紫菜蛋花汤'];
+
+        // 初始化滚轮内容
+        reels.forEach((reel, index) => {
+            const contents = [reelContents1, reelContents2, reelContents3][index];
+            contents.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'reel-item';
+                div.textContent = item;
+                reel.appendChild(div);
+            });
+        });
+        function spin() {
+            startBtn.disabled = true;
+            
+            reels.forEach((reel, index) => {
+                const contents = [reelContents1, reelContents2, reelContents3][index];
+                reel.style.willChange = 'transform';
+                reel.style.transition = 'none';
+                
+                // 新增方向随机参数（1或-1）
+                const direction = Math.random() > 0.5 ? 1 : -1;
+                const startTime = Date.now();
+                
+                const animate = () => {
+                    const elapsed = Date.now() - startTime;
+                    if (elapsed < 2000) {
+                        // 应用方向参数到滚动计算
+                        const currentPos = (elapsed * 0.5 * direction) % (contents.length * 100);
+                        reel.style.transform = `translateY(-${Math.abs(currentPos)}px)`;
+                        requestAnimationFrame(animate);
+                    }
+                };
+                requestAnimationFrame(animate);
+
+                setTimeout(() => {
+                    // 保持最终定位精度
+                    const randomIndex = Math.floor(Math.random() * contents.length);
+                    const finalPosition = randomIndex * 100;
+                    
+                    // 优化过渡曲线，根据方向调整缓动参数
+                    reel.style.transition = `transform 3s cubic-bezier(${
+                        direction > 0 ? '0.4, 0, 0.2, 1' : '0.2, 0, 0.4, 1'
+                    })`;
+                    reel.style.transform = `translateY(-${finalPosition}px)`;
+                }, 2000);
+            });
+
+            setTimeout(() => {
+                reels.forEach(reel => reel.style.willChange = 'auto');
+                startBtn.disabled = false;
+                const result = Array.from(reels).map((reel, index) => {
+                    const contents = [reelContents1, reelContents2, reelContents3][index];
+                    const currentIndex = Math.abs(parseInt(reel.style.transform.replace(/[^0-9]/g, '')) / 100);
+                    return contents[currentIndex];
+                }).join(' - ');
+                document.getElementById('result').textContent = `结果：${result}`;
+            }, 5000);
+        }
+
+        startBtn.addEventListener('click', spin);
+    </script>
+</body>
+</html>
