@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <title>今天吃啥</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="slot-machine" id="slotMachine">
         <div class="reel"><div class="reel-content"></div></div>
@@ -17,71 +19,171 @@
     <script>
         const reels = document.querySelectorAll('.reel-content');
         const startBtn = document.getElementById('startBtn');
-        
-        // 配置三个独立滚轮的内容数组
-        const reelContents1 = ['鸡', '鸭', '鱼', '猪', '牛', '羊'];
-        const reelContents2 = ['米饭', '粥', '馒头', '包子', '炒粉']; 
-        const reelContents3 = ['例汤', '排骨汤', '紫菜蛋花汤'];
 
-        // 初始化滚轮内容
-        reels.forEach((reel, index) => {
-            const contents = [reelContents1, reelContents2, reelContents3][index];
-            contents.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'reel-item';
-                div.textContent = item;
-                reel.appendChild(div);
-            });
+        // 三级 JSON 结构数据
+        const cascadeData = {
+            "盖码饭": {
+                "招聘": ["黄瓜炒肉", "豆角西红柿"],
+                "多拼": ["双拼", "三拼"],
+                "其他": ["其他"]
+            },
+            "尊宝": {
+                "披萨": ["榴莲", "奥尔良", "芝士酸奶", "意式肉酱", "咖喱牛肉", "咸蛋培根"],
+                "小吃": ["胡椒鸡块", "鸡米花", "香骨鸡", "奥尔良烤翅", "藤椒翅尖", "火山石烤肠", "薯条", "蛋挞", "香芋丸"]
+            },
+            "厨禾炒饭": {
+                "炒饭": ["酸菜牛肉", "黄金炒饭", "老干妈炒饭"],
+                "炒面": ["火腿丁", "肉丝", "腊肠鸡蛋", "虾仁蟹排"]
+            },
+            "切八刀": {
+                "招牌": ["枸杞叶", "紫金八刀汤", "招牌八刀"]
+            }
+        };
+
+        // 初始化第一个滚轮内容
+        const firstLevelKeys = Object.keys(cascadeData);
+        firstLevelKeys.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'reel-item';
+            div.textContent = item;
+            reels[0].appendChild(div);
+            adjustTextSize(div);
         });
+
+        function adjustTextSize(element) {
+            let fontSize = 20; // 初始字体大小
+            element.style.fontSize = `${fontSize}px`;
+            while (element.scrollWidth > element.clientWidth) {
+                fontSize--;
+                element.style.fontSize = `${fontSize}px`;
+                if (fontSize < 10) {
+                    break; // 最小字体大小
+                }
+            }
+        }
+
         function spin() {
             startBtn.disabled = true;
-            
-            reels.forEach((reel, index) => {
-                const contents = [reelContents1, reelContents2, reelContents3][index];
-                reel.style.willChange = 'transform';
-                reel.style.transition = 'none';
-                
-                // 新增方向随机参数（1或-1）
-                const direction = Math.random() > 0.5 ? 1 : -1;
-                const startTime = Date.now();
-                
-                const animate = () => {
-                    const elapsed = Date.now() - startTime;
-                    if (elapsed < 2000) {
-                        // 应用方向参数到滚动计算
-                        const currentPos = (elapsed * 0.5 * direction) % (contents.length * 100);
-                        reel.style.transform = `translateY(-${Math.abs(currentPos)}px)`;
-                        requestAnimationFrame(animate);
-                    }
-                };
-                requestAnimationFrame(animate);
 
-                setTimeout(() => {
-                    // 保持最终定位精度
-                    const randomIndex = Math.floor(Math.random() * contents.length);
-                    const finalPosition = randomIndex * 100;
-                    
-                    // 优化过渡曲线，根据方向调整缓动参数
-                    reel.style.transition = `transform 3s cubic-bezier(${
-                        direction > 0 ? '0.4, 0, 0.2, 1' : '0.2, 0, 0.4, 1'
-                    })`;
-                    reel.style.transform = `translateY(-${finalPosition}px)`;
-                }, 2000);
-            });
+            // 第一个滚轮滚动
+            const firstReel = reels[0];
+            const firstReelContents = firstLevelKeys;
+            firstReel.style.willChange = 'transform';
+            firstReel.style.transition = 'none';
+            const firstDirection = Math.random() > 0.5 ? 1 : -1;
+            const firstStartTime = Date.now();
+
+            const firstAnimate = () => {
+                const elapsed = Date.now() - firstStartTime;
+                if (elapsed < 2000) {
+                    const currentPos = (elapsed * 0.5 * firstDirection) % (firstReelContents.length * 100);
+                    firstReel.style.transform = `translateY(-${Math.abs(currentPos)}px)`;
+                    requestAnimationFrame(firstAnimate);
+                }
+            };
+            requestAnimationFrame(firstAnimate);
 
             setTimeout(() => {
-                reels.forEach(reel => reel.style.willChange = 'auto');
-                startBtn.disabled = false;
-                const result = Array.from(reels).map((reel, index) => {
-                    const contents = [reelContents1, reelContents2, reelContents3][index];
-                    const currentIndex = Math.abs(parseInt(reel.style.transform.replace(/[^0-9]/g, '')) / 100);
-                    return contents[currentIndex];
-                }).join(' - ');
-                document.getElementById('result').textContent = `结果：${result}`;
-            }, 5000);
+                const firstRandomIndex = Math.floor(Math.random() * firstReelContents.length);
+                const firstFinalPosition = firstRandomIndex * 100;
+                firstReel.style.transition = `transform 3s cubic-bezier(${
+                    firstDirection > 0 ? '0.4, 0, 0.2, 1' : '0.2, 0, 0.4, 1'
+                })`;
+                firstReel.style.transform = `translateY(-${firstFinalPosition}px)`;
+
+                // 获取第一个滚轮的结果
+                const firstResult = firstReelContents[firstRandomIndex];
+
+                // 初始化第二个滚轮内容
+                const secondLevelKeys = Object.keys(cascadeData[firstResult]);
+                reels[1].innerHTML = '';
+                secondLevelKeys.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'reel-item';
+                    div.textContent = item;
+                    reels[1].appendChild(div);
+                    adjustTextSize(div);
+                });
+
+                // 第二个滚轮滚动
+                const secondReel = reels[1];
+                const secondReelContents = secondLevelKeys;
+                secondReel.style.willChange = 'transform';
+                secondReel.style.transition = 'none';
+                const secondDirection = Math.random() > 0.5 ? 1 : -1;
+                const secondStartTime = Date.now();
+
+                const secondAnimate = () => {
+                    const elapsed = Date.now() - secondStartTime;
+                    if (elapsed < 2000) {
+                        const currentPos = (elapsed * 0.5 * secondDirection) % (secondReelContents.length * 100);
+                        secondReel.style.transform = `translateY(-${Math.abs(currentPos)}px)`;
+                        requestAnimationFrame(secondAnimate);
+                    }
+                };
+                requestAnimationFrame(secondAnimate);
+
+                setTimeout(() => {
+                    const secondRandomIndex = Math.floor(Math.random() * secondReelContents.length);
+                    const secondFinalPosition = secondRandomIndex * 100;
+                    secondReel.style.transition = `transform 3s cubic-bezier(${
+                        secondDirection > 0 ? '0.4, 0, 0.2, 1' : '0.2, 0, 0.4, 1'
+                    })`;
+                    secondReel.style.transform = `translateY(-${secondFinalPosition}px)`;
+
+                    // 获取第二个滚轮的结果
+                    const secondResult = secondReelContents[secondRandomIndex];
+
+                    // 初始化第三个滚轮内容
+                    const thirdLevelContents = cascadeData[firstResult][secondResult];
+                    reels[2].innerHTML = '';
+                    thirdLevelContents.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'reel-item';
+                        div.textContent = item;
+                        reels[2].appendChild(div);
+                        adjustTextSize(div);
+                    });
+
+                    // 第三个滚轮滚动
+                    const thirdReel = reels[2];
+                    const thirdReelContents = thirdLevelContents;
+                    thirdReel.style.willChange = 'transform';
+                    thirdReel.style.transition = 'none';
+                    const thirdDirection = Math.random() > 0.5 ? 1 : -1;
+                    const thirdStartTime = Date.now();
+
+                    const thirdAnimate = () => {
+                        const elapsed = Date.now() - thirdStartTime;
+                        if (elapsed < 2000) {
+                            const currentPos = (elapsed * 0.5 * thirdDirection) % (thirdReelContents.length * 100);
+                            thirdReel.style.transform = `translateY(-${Math.abs(currentPos)}px)`;
+                            requestAnimationFrame(thirdAnimate);
+                        }
+                    };
+                    requestAnimationFrame(thirdAnimate);
+
+                    setTimeout(() => {
+                        const thirdRandomIndex = Math.floor(Math.random() * thirdReelContents.length);
+                        const thirdFinalPosition = thirdRandomIndex * 100;
+                        thirdReel.style.transition = `transform 3s cubic-bezier(${
+                            thirdDirection > 0 ? '0.4, 0, 0.2, 1' : '0.2, 0, 0.4, 1'
+                        })`;
+                        thirdReel.style.transform = `translateY(-${thirdFinalPosition}px)`;
+
+                        // 获取最终结果
+                        const finalResult = `${firstResult} - ${secondResult} - ${thirdReelContents[thirdRandomIndex]}`;
+                        document.getElementById('result').textContent = `结果：${finalResult}`;
+
+                        reels.forEach(reel => reel.style.willChange = 'auto');
+                        startBtn.disabled = false;
+                    }, 2000);
+                }, 2000);
+            }, 2000);
         }
 
         startBtn.addEventListener('click', spin);
     </script>
 </body>
+
 </html>
