@@ -55,3 +55,17 @@ body {
     font-size: 24px;
     font-weight: bold;
 }
+
+/* 媒体查询，当屏幕宽度小于等于 768px 时（一般手机屏幕宽度） */
+@media (max-width: 768px) {
+    .slot-machine {
+        width: 100%; /* 让滚轮区域宽度铺满屏幕 */
+        box-sizing: border-box; /* 确保内边距和边框不会增加元素的宽度 */
+        padding: 15px; /* 减少内边距 */
+        gap: 10px; /* 减少间隙 */
+    }
+
+    .reel {
+        width: calc((100% - 20px) / 3); /* 平均分配宽度 */
+    }
+}
